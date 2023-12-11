@@ -15,7 +15,6 @@ export class App extends Component {
     modal: false,
     loading: false,
     error: null,
-    flag: false,
   };
 
   async componentDidMount() {
@@ -64,10 +63,14 @@ export class App extends Component {
 
   render() {
     const { images, loading, focusURL, modal } = this.state;
+    let aLotOfImage = false;
+    if (images && images.length >= 12) {
+      aLotOfImage = true;
+    }
     return (
       <div className={s.App}>
         <Searchbar onSearchQuery={this.onSearchQuery} />
-        <Loader loading={loading} />
+        {loading && <Loader />}
         <ImageGallery
           images={images}
           openModal={url =>
@@ -78,7 +81,9 @@ export class App extends Component {
           }
         />
         {!images.length && !loading && (
-          <h2>Sorry! Nothing found! Try again, please!</h2>
+          <h2 className={s.Nothify}>
+            Sorry! Nothing found! Try again, please!
+          </h2>
         )}
         {modal && (
           <Modal
@@ -86,7 +91,7 @@ export class App extends Component {
             closeModal={() => this.setState({ modal: false })}
           />
         )}
-        <Button addMoreImages={this.onLoadMore} />
+        {aLotOfImage && <Button addMoreImages={this.onLoadMore} />}
       </div>
     );
   }

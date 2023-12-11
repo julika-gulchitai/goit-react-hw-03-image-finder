@@ -27,18 +27,3 @@ export const searchImagesbyQuery = async (query, page) => {
   const response = await axios.get(`?${params}`);
   return response.data;
 };
-
-// export const searchImage = async configParams => {
-//   const { data } = await axios.get(`/?`, {
-//     params: {
-//       key: '40712240-584c6352de5cb384d1e409b2f',
-//       q: '',
-//       image_type: 'photo',
-//       orientation: 'horizontal',
-//       per_page: 12,
-//       ...configParams,
-//       //   ...params,
-//     },
-//   });
-//   return data;
-// };
