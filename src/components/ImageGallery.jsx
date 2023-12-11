@@ -1,9 +1,20 @@
+import { ImageGalleryItem } from './ImageGalleryItem';
 import s from './Styles.module.css';
 
-export const ImageGallery = () => {
+export const ImageGallery = ({ images, openModal }) => {
   return (
     <ul className={s.ImageGallery}>
-      <li>image</li>
+      {images.map(({ id, webformatURL, largeImageURL }) => {
+        return (
+          <ImageGalleryItem
+            key={id}
+            id={id}
+            webformatURL={webformatURL}
+            largeImageURL={largeImageURL}
+            openModal={openModal}
+          />
+        );
+      })}
     </ul>
   );
 };

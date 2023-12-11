@@ -1,20 +1,93 @@
+import { Component } from 'react';
+import { Button } from './Button';
 import { ImageGallery } from './ImageGallery';
 import { Searchbar } from './Searchbar';
+import s from './Styles.module.css';
+import { searchImages, searchImagesbyQuery } from '../services/api';
+import { Modal } from './Modal';
+import { Loader } from './Loader';
 
-export const App = () => {
-  return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        color: '#010101',
-      }}
-    >
-      <Searchbar />
-      <ImageGallery />
-    </div>
-  );
-};
+export class App extends Component {
+  state = {
+    images: [],
+    page: 1,
+    search: '',
+    modal: false,
+    loading: false,
+    error: null,
+    flag: false,
+  };
+
+  async componentDidMount() {
+    try {
+      this.setState({ loading: true, error: null });
+      const { hits: searchimages } = await searchImages();
+
+      if (searchimages === undefined) this.setState({ images: [] });
+      else this.setState({ images: searchimages });
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      this.setState({ loading: false });
+    }
+  }
+  onSearchQuery = e => {
+    this.setState({ search: e.target[0].value, page: 1 });
+  };
+
+  async componentDidUpdate(_, prevState) {
+    if (
+      prevState.search !== this.state.search ||
+      prevState.page !== this.state.page
+    ) {
+      if (prevState.search !== this.state.search) this.setState({ images: [] });
+      try {
+        this.setState({ loading: true });
+        const { hits: resultImages } = await searchImagesbyQuery(
+          this.state.search,
+          this.state.page
+        );
+        if (resultImages !== undefined)
+          this.setState(prevState => ({
+            images: [...prevState.images, ...resultImages],
+          }));
+      } catch (error) {
+        console.log(error.message);
+      } finally {
+        this.setState({ loading: false });
+      }
+    }
+  }
+  onLoadMore = () => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
+  };
+
+  render() {
+    const { images, loading, focusURL, modal } = this.state;
+    return (
+      <div className={s.App}>
+        <Searchbar onSearchQuery={this.onSearchQuery} />
+        <Loader loading={loading} />
+        <ImageGallery
+          images={images}
+          openModal={url =>
+            this.setState({
+              focusURL: url,
+              modal: true,
+            })
+          }
+        />
+        {!images.length && !loading && (
+          <h2>Sorry! Nothing found! Try again, please!</h2>
+        )}
+        {modal && (
+          <Modal
+            url={focusURL}
+            closeModal={() => this.setState({ modal: false })}
+          />
+        )}
+        <Button addMoreImages={this.onLoadMore} />
+      </div>
+    );
+  }
+}
